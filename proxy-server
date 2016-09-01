@@ -1,0 +1,23 @@
+echo "Enter the IP address of Object Server:: "
+read ADDRESS
+cd /etc/swift/
+rm -rf *.builder *.gz
+mv account-server/ container-server/ object-server/ /tmp/
+mv container-reconciler.conf container-sync-realms.conf object-expirer.conf /tmp/
+
+nic=`ls -og /sys/class/net | grep -v virtual | awk '{print $7}'`
+MY_PRIVATE_IP=`ip a | grep $nic | grep inet | awk '{print $2}' | awk -F'/' '{print $1}'`
+sudo sed -i "s/127.0.0.1/$MY_PRIVATE_IP/" proxy-server.conf
+
+cd backups
+sudo rm -rf *
+cd /srv/
+sudo rm -rf *
+cd /mnt/
+sudo umount sdb1/
+sudo rm -rf *
+cd
+sudo sed -i "s/127.0.0.1/$MY_PRIVATE_IP/" swiftrc
+sudo sed -i "s/ :/:/" swiftrc
+cd bin/
+sudo sed -i "s/127.0.0.1/$ADDRESS/" remakerings
